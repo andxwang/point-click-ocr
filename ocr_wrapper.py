@@ -162,4 +162,3 @@ class OCRApp:
         text_area = Text(text_window)
         text_area.pack(fill=BOTH, expand=True)
         text_area.insert(1.0, text)
-

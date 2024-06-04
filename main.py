@@ -1,6 +1,5 @@
 from ocr_wrapper import OCRApp
-from tkinter import *
-
+from tkinter import Tk
 
 
 if __name__ == "__main__":
