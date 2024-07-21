@@ -3,8 +3,8 @@ import pytesseract
 from tkinter import *
 from tkinter import filedialog
 from PIL import Image, ImageTk
+from screeninfo import get_monitors
 
-from reading import parse_tesseract_data
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
@@ -32,17 +32,24 @@ class OCRApp:
         self.start_y = None
         self.im = None
         self.ocr_result = None
+        self.scale_factor = 1
         
+    def get_screen_size(self):
+        monitor = get_monitors()[0]
+        return monitor.width, monitor.height
+    
     def load_image(self):
         file_path = filedialog.askopenfilename()
         if file_path:
             self.im = cv2.imread(file_path)
-            self.ocr_result = pytesseract.image_to_string(self.im, config='--oem 3 --psm 3', lang='jpn_vert')
-            print(self.ocr_result)
-            data = pytesseract.image_to_data(self.im, output_type=pytesseract.Output.DICT, lang='jpn_vert')
-            out = parse_tesseract_data(data)
-            from pprint import pprint
-            pprint(out)
+            screen_width, screen_height = self.get_screen_size()
+            img_height, img_width = self.im.shape[:2]
+            
+            if img_width > screen_width or img_height > screen_height:
+                self.scale_factor = min(screen_width / img_width, screen_height / img_height)
+                self.im = cv2.resize(self.im, (int(img_width * self.scale_factor), int(img_height * self.scale_factor)), interpolation=cv2.INTER_AREA)
+            
+            self.ocr_result = pytesseract.image_to_string(self.im)
             self.display_image(self.im)
     
     def display_image(self, image):
